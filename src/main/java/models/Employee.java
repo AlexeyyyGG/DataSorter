@@ -1,0 +1,31 @@
+package models;
+
+public class Employee {
+    private int id;
+    private String name;
+    private double salary;
+    private int managerId;
+
+    public Employee(int id, String name, Double salary, int managerId) {
+        this.id = id;
+        this.name = name;
+        this.salary = salary;
+        this.managerId = managerId;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public double getSalary() {
+        return salary;
+    }
+
+    public int getManagerId() {
+        return managerId;
+    }
+}
