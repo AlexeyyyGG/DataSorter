@@ -9,11 +9,11 @@ import models.Employee;
 import models.Manager;
 
 public class FileWriter {
-    private final Map<String, Department> departments;
+    private Map<String, Department> departments;
     private static final String MANAGER_PARAMS = "Manager, %d, %s, %.2f, %s";
     private static final String EMPLOYEE_PARAMS = "Employee, %d, %s, %.2f, %d";
 
-    public FileWriter(Map<String, Department> departments) {
+    public void setDepartments(Map<String, Department> departments) {
         this.departments = departments;
     }
 
