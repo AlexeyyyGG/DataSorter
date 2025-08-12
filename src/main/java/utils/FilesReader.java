@@ -16,7 +16,7 @@ public class FilesReader {
     private static final String FILE_PATTERN = "*.sb";
     private static final String ERROR_READING_MESSAGE = "Error while reading directory";
 
-    public List<Path> findSbFiles() {
+    private List<Path> findSbFiles() {
         Path directory = Paths.get(System.getProperty(SYSTEM_PROPERTY_USER_DIR));
         List<Path> files = new ArrayList<>();
         try (DirectoryStream<Path> stream = Files.newDirectoryStream(directory, FILE_PATTERN)) {
@@ -46,7 +46,6 @@ public class FilesReader {
                 String[] args = line.split(",");
                 if (args.length < 5) {
                     errors.add(line);
-                    ErrorLogger.errorLog(line);
                     continue;
                 }
                 String position = args[0].trim();
@@ -67,11 +66,9 @@ public class FilesReader {
                         employees.add(employee);
                     } else {
                         errors.add(line);
-                        ErrorLogger.errorLog(line);
                     }
                 } catch (NumberFormatException e) {
                     errors.add(line);
-                    ErrorLogger.errorLog(line);
                 }
             }
         }

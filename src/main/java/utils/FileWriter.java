@@ -9,15 +9,10 @@ import models.Employee;
 import models.Manager;
 
 public class FileWriter {
-    private Map<String, Department> departments;
     private static final String MANAGER_PARAMS = "Manager, %d, %s, %.2f, %s";
     private static final String EMPLOYEE_PARAMS = "Employee, %d, %s, %.2f, %d";
 
-    public void setDepartments(Map<String, Department> departments) {
-        this.departments = departments;
-    }
-
-    public void writeFiles() {
+    public void writeFiles(Map<String, Department> departments) {
         for (String departmentName : departments.keySet()) {
             Department department = departments.get(departmentName);
             String fileName = departmentName + ".sb";

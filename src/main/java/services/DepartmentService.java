@@ -1,5 +1,6 @@
 package services;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,6 +16,7 @@ public class DepartmentService {
     private final FilesReader filesReader;
     private final FileWriter fileWriter;
     private final Map<String, Department> departments = new HashMap<>();
+    private final List<Employee> employeesWithOutDept = new ArrayList<>();
 
     public DepartmentService(FilesReader filesReader, FileWriter fileWriter) {
         this.filesReader = filesReader;
@@ -24,11 +26,12 @@ public class DepartmentService {
     public void start() {
         ParseResult result = filesReader.readSbFilesAndParse();
         buildDepartments(result);
-        fileWriter.setDepartments(departments);
-        fileWriter.writeFiles();
+        ErrorLogger.errorLogString(result.getErrors());
+        ErrorLogger.errorLogEmployee(employeesWithOutDept);
+        fileWriter.writeFiles(departments);
     }
 
-    public void buildDepartments(ParseResult result) {
+    private void buildDepartments(ParseResult result) {
         for (Manager manager : result.getManagers()) {
             Department department = getOrCreateDepartment(manager.getDepartmentName());
             department.addManager(manager);
@@ -39,16 +42,16 @@ public class DepartmentService {
                 Department department = getOrCreateDepartment(manager.getDepartmentName());
                 department.addEmployee(employee);
             } else {
-                ErrorLogger.errorLog(employee.toString());
+                employeesWithOutDept.add(employee);
             }
         }
     }
 
-    public Department getOrCreateDepartment(String name) {
+    private Department getOrCreateDepartment(String name) {
         return departments.computeIfAbsent(name, Department::new);
     }
 
-    public Manager findManagerById(List<Manager> managers, int id) {
+    private Manager findManagerById(List<Manager> managers, int id) {
         for (Manager m : managers) {
             if (m.getId() == id) {
                 return m;
