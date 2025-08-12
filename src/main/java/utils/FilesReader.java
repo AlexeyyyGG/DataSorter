@@ -7,7 +7,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
-import logger.ErrorLogger;
 import models.Employee;
 import models.Manager;
 
@@ -15,6 +14,8 @@ public class FilesReader {
     private static final String SYSTEM_PROPERTY_USER_DIR = "user.dir";
     private static final String FILE_PATTERN = "*.sb";
     private static final String ERROR_READING_MESSAGE = "Error while reading directory";
+    private static final String MANAGER_STRING = "manager";
+    private static final String EMPLOYEE_STRING = "employee";
 
     private List<Path> findSbFiles() {
         Path directory = Paths.get(System.getProperty(SYSTEM_PROPERTY_USER_DIR));
@@ -50,14 +51,14 @@ public class FilesReader {
                 }
                 String position = args[0].trim();
                 try {
-                    if (position.equalsIgnoreCase("manager")) {
+                    if (position.equalsIgnoreCase(MANAGER_STRING)) {
                         int id = Integer.parseInt(args[1].trim());
                         String name = args[2].trim();
                         double salary = Double.parseDouble(args[3].trim());
                         String departmentName = args[4].trim();
                         Manager manager = new Manager(id, name, salary, departmentName);
                         managers.add(manager);
-                    } else if (position.equalsIgnoreCase("employee")) {
+                    } else if (position.equalsIgnoreCase(EMPLOYEE_STRING)) {
                         int id = Integer.parseInt(args[1].trim());
                         String name = args[2].trim();
                         double salary = Double.parseDouble(args[3].trim());

@@ -11,6 +11,7 @@ import models.Manager;
 public class FileWriter {
     private static final String MANAGER_PARAMS = "Manager, %d, %s, %.2f, %s";
     private static final String EMPLOYEE_PARAMS = "Employee, %d, %s, %.2f, %d";
+    private static final String FAILED_TO_WRITE_MESSAGE = "Failed to write file";
 
     public void writeFiles(Map<String, Department> departments) {
         for (String departmentName : departments.keySet()) {
@@ -41,7 +42,7 @@ public class FileWriter {
                     bw.newLine();
                 }
             } catch (IOException e) {
-                throw new RuntimeException("Failed to write file", e);
+                throw new RuntimeException(FAILED_TO_WRITE_MESSAGE, e);
             }
         }
     }
