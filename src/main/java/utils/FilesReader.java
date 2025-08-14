@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 import models.Employee;
 import models.Manager;
+import validator.SalaryValidator;
 
 public class FilesReader {
     private static final String SYSTEM_PROPERTY_USER_DIR = "user.dir";
@@ -16,19 +17,6 @@ public class FilesReader {
     private static final String ERROR_READING_MESSAGE = "Error while reading directory";
     private static final String MANAGER_STRING = "manager";
     private static final String EMPLOYEE_STRING = "employee";
-
-    private List<Path> findSbFiles() {
-        Path directory = Paths.get(System.getProperty(SYSTEM_PROPERTY_USER_DIR));
-        List<Path> files = new ArrayList<>();
-        try (DirectoryStream<Path> stream = Files.newDirectoryStream(directory, FILE_PATTERN)) {
-            for (Path path : stream) {
-                files.add(path.toAbsolutePath());
-            }
-        } catch (IOException e) {
-            throw new RuntimeException(ERROR_READING_MESSAGE, e);
-        }
-        return files;
-    }
 
     public ParseResult readSbFilesAndParse() {
         List<Path> files = findSbFiles();
@@ -55,6 +43,10 @@ public class FilesReader {
                         int id = Integer.parseInt(args[1].trim());
                         String name = args[2].trim();
                         double salary = Double.parseDouble(args[3].trim());
+                        if (!SalaryValidator.validateSalary(salary)) {
+                            errors.add(line);
+                            continue;
+                        }
                         String departmentName = args[4].trim();
                         Manager manager = new Manager(id, name, salary, departmentName);
                         managers.add(manager);
@@ -62,6 +54,10 @@ public class FilesReader {
                         int id = Integer.parseInt(args[1].trim());
                         String name = args[2].trim();
                         double salary = Double.parseDouble(args[3].trim());
+                        if (!SalaryValidator.validateSalary(salary)) {
+                            errors.add(line);
+                            continue;
+                        }
                         int managerId = Integer.parseInt(args[4].trim());
                         Employee employee = new Employee(id, name, salary, managerId);
                         employees.add(employee);
@@ -74,5 +70,18 @@ public class FilesReader {
             }
         }
         return new ParseResult(managers, employees, errors);
+    }
+
+    private List<Path> findSbFiles() {
+        Path directory = Paths.get(System.getProperty(SYSTEM_PROPERTY_USER_DIR));
+        List<Path> files = new ArrayList<>();
+        try (DirectoryStream<Path> stream = Files.newDirectoryStream(directory, FILE_PATTERN)) {
+            for (Path path : stream) {
+                files.add(path.toAbsolutePath());
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(ERROR_READING_MESSAGE, e);
+        }
+        return files;
     }
 }

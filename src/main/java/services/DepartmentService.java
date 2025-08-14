@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import logger.ErrorLogger;
 import models.Department;
 import models.Employee;
 import models.Manager;
@@ -14,30 +13,27 @@ import utils.ParseResult;
 
 public class DepartmentService {
     private final FilesReader filesReader;
-    private final FileWriter fileWriter;
     private final Map<String, Department> departments = new HashMap<>();
     private final List<Employee> employeesWithOutDept = new ArrayList<>();
 
-    public DepartmentService(FilesReader filesReader, FileWriter fileWriter) {
+    public DepartmentService(FilesReader filesReader) {
         this.filesReader = filesReader;
-        this.fileWriter = fileWriter;
     }
 
     public void start() {
         ParseResult result = filesReader.readSbFilesAndParse();
         buildDepartments(result);
-        ErrorLogger.errorLogString(result.getErrors());
-        ErrorLogger.errorLogEmployee(employeesWithOutDept);
-        fileWriter.writeFiles(departments);
+        FileWriter.writeErrors(result.errors(), employeesWithOutDept);
+        FileWriter.writeFiles(departments);
     }
 
     private void buildDepartments(ParseResult result) {
-        for (Manager manager : result.getManagers()) {
+        for (Manager manager : result.managers()) {
             Department department = getOrCreateDepartment(manager.getDepartmentName());
             department.addManager(manager);
         }
-        for (Employee employee : result.getEmployees()) {
-            Manager manager = findManagerById(result.getManagers(), employee.getManagerId());
+        for (Employee employee : result.employees()) {
+            Manager manager = findManagerById(result.managers(), employee.getManagerId());
             if (manager != null) {
                 Department department = getOrCreateDepartment(manager.getDepartmentName());
                 department.addEmployee(employee);

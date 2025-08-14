@@ -2,6 +2,7 @@ package utils;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import models.Department;
@@ -11,9 +12,11 @@ import models.Manager;
 public class FileWriter {
     private static final String MANAGER_PARAMS = "Manager, %d, %s, %.2f, %s";
     private static final String EMPLOYEE_PARAMS = "Employee, %d, %s, %.2f, %d";
-    private static final String FAILED_TO_WRITE_MESSAGE = "Failed to write file";
+    private static final String FAILED_TO_WRITE_FILE_MESSAGE = "Failed to write file";
+    private static final String FAILED_TO_WRITE = "Failed to write to error log";
+    private static final String ERROR_LOG_FILE = "error.log";
 
-    public void writeFiles(Map<String, Department> departments) {
+    public static void writeFiles(Map<String, Department> departments) {
         for (String departmentName : departments.keySet()) {
             Department department = departments.get(departmentName);
             String fileName = departmentName + ".sb";
@@ -42,8 +45,23 @@ public class FileWriter {
                     bw.newLine();
                 }
             } catch (IOException e) {
-                throw new RuntimeException(FAILED_TO_WRITE_MESSAGE, e);
+                throw new RuntimeException(FAILED_TO_WRITE_FILE_MESSAGE, e);
             }
+        }
+    }
+
+    public static void writeErrors(List<String> errors, List<Employee> employees) {
+        try (BufferedWriter bw = new BufferedWriter(new java.io.FileWriter(ERROR_LOG_FILE, true))) {
+            for (String error : errors) {
+                bw.write(error);
+                bw.newLine();
+            }
+            for (Employee employee : employees) {
+                bw.write(employee.toString());
+                bw.newLine();
+            }
+        } catch (IOException ioe) {
+            throw new RuntimeException(FAILED_TO_WRITE, ioe);
         }
     }
 }
