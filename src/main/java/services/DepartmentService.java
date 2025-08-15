@@ -12,16 +12,11 @@ import utils.FilesReader;
 import utils.ParseResult;
 
 public class DepartmentService {
-    private final FilesReader filesReader;
     private final Map<String, Department> departments = new HashMap<>();
     private final List<Employee> employeesWithOutDept = new ArrayList<>();
 
-    public DepartmentService(FilesReader filesReader) {
-        this.filesReader = filesReader;
-    }
-
     public void start() {
-        ParseResult result = filesReader.readSbFilesAndParse();
+        ParseResult result = FilesReader.readSbFilesAndParse();
         buildDepartments(result);
         FileWriter.writeErrors(result.errors(), employeesWithOutDept);
         FileWriter.writeFiles(departments);
