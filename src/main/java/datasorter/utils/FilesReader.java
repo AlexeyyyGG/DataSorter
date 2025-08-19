@@ -1,4 +1,4 @@
-package utils;
+package datasorter.utils;
 
 import java.io.IOException;
 import java.nio.file.DirectoryStream;
@@ -9,9 +9,9 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import models.Employee;
-import models.Manager;
-import validator.SalaryValidator;
+import datasorter.models.Employee;
+import datasorter.models.Manager;
+import datasorter.validator.SalaryValidator;
 
 public class FilesReader {
     private static final String SYSTEM_PROPERTY_USER_DIR = "user.dir";
@@ -115,7 +115,7 @@ public class FilesReader {
             return;
         }
         managerIds.add(id);
-        Manager manager = new Manager(id, name, salary, departmentName);
+        Manager manager = new Manager(id, name.trim(), salary, departmentName.trim());
         managers.add(manager);
     }
 
@@ -141,7 +141,7 @@ public class FilesReader {
             return;
         }
         employeeIds.add(id);
-        Employee employee = new Employee(id, name, salary, managerId);
+        Employee employee = new Employee(id, name.trim(), salary, managerId);
         employees.add(employee);
     }
 }

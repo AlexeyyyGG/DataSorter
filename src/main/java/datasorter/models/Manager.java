@@ -1,4 +1,4 @@
-package models;
+package datasorter.models;
 
 public class Manager {
     private int id;

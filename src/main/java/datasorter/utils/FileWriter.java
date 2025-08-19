@@ -1,13 +1,13 @@
-package utils;
+package datasorter.utils;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import models.Department;
-import models.Employee;
-import models.Manager;
+import datasorter.models.Department;
+import datasorter.models.Employee;
+import datasorter.models.Manager;
 
 public class FileWriter {
     private static final String MANAGER_PARAMS = "Manager, %d, %s, %.2f, %s";

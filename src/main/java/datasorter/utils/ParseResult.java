@@ -1,8 +1,8 @@
-package utils;
+package datasorter.utils;
 
 import java.util.List;
-import models.Employee;
-import models.Manager;
+import datasorter.models.Employee;
+import datasorter.models.Manager;
 
 public record ParseResult(List<Manager> managers, List<Employee> employees, List<String> errors) {
 }
