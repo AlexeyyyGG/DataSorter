@@ -1,10 +1,10 @@
 package datasorter.models;
 
 public class Employee {
-    private int id;
-    private String name;
-    private double salary;
-    private int managerId;
+    private final int id;
+    private final String name;
+    private final double salary;
+    private final int managerId;
 
     public Employee(int id, String name, Double salary, int managerId) {
         this.id = id;

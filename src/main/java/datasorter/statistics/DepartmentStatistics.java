@@ -18,7 +18,7 @@ public class DepartmentStatistics {
         this.midSalary = formatDouble(midSalary);
     }
 
-    private static String formatDouble(double value) {
+    private String formatDouble(double value) {
         return String.format("%.2f", value);
     }
 }

@@ -1,5 +1,6 @@
 package datasorter.utils;
 
+import datasorter.result.ParseResult;
 import java.io.IOException;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
@@ -25,10 +26,11 @@ public class FilesReader {
         List<Manager> managers = new ArrayList<>();
         List<Employee> employees = new ArrayList<>();
         List<String> errors = new ArrayList<>();
-        Set<Integer> managerIds = new HashSet<>();
-        Set<Integer> employeeIds = new HashSet<>();
         for (Path filePath : files) {
-            parseFile(filePath, managers, employees, errors, managerIds, employeeIds);
+            ParseResult parseResult = parseFile(filePath);
+            managers.addAll(parseResult.managers());
+            employees.addAll(parseResult.employees());
+            errors.addAll(parseResult.errors());
         }
         return new ParseResult(managers, employees, errors);
     }
@@ -46,102 +48,82 @@ public class FilesReader {
         return files;
     }
 
-    private static void parseFile(
-            Path filePath,
-            List<Manager> managers,
-            List<Employee> employees,
-            List<String> errors,
-            Set<Integer> managerIds,
-            Set<Integer> employeeIds
-    ) {
+    private static ParseResult parseFile(Path filePath) {
+        List<Manager> managers = new ArrayList<>();
+        List<Employee> employees = new ArrayList<>();
+        List<String> errors = new ArrayList<>();
         List<String> lines;
         try {
             lines = Files.readAllLines(filePath);
         } catch (IOException e) {
             errors.add(ERROR_READING_MESSAGE);
-            return;
+            return new ParseResult(managers, employees, errors);
         }
+        Set<Integer> managerIds = new HashSet<>();
+        Set<Integer> employeeIds = new HashSet<>();
         for (String line : lines) {
-            parseLine(line, managers, employees, errors, managerIds, employeeIds);
+            ParseResult result = parseLine(line);
+            errors.addAll(result.errors());
+            for (Manager manager : result.managers()) {
+                if (managerIds.contains(manager.getId())) {
+                    errors.add(line);
+                } else {
+                    managerIds.add(manager.getId());
+                }
+                managers.add(manager);
+            }
+            for (Employee employee : result.employees()) {
+                if (employeeIds.contains(employee.getId())) {
+                    errors.add(line);
+                } else {
+                    employeeIds.add(employee.getId());
+                }
+                employees.add(employee);
+            }
         }
+        return new ParseResult(managers, employees, errors);
     }
 
-    private static void parseLine(
-            String line,
-            List<Manager> managers,
-            List<Employee> employees,
-            List<String> errors,
-            Set<Integer> managerIds,
-            Set<Integer> employeeIds
-    ) {
+    private static ParseResult parseLine(String line) {
+        List<String> errors = new ArrayList<>();
+        List<Manager> managers = new ArrayList<>();
+        List<Employee> employees = new ArrayList<>();
         String[] args = line.split(",");
         if (args.length < 5) {
             errors.add(line);
-            return;
+            return new ParseResult(managers, employees, errors);
         }
         String position = args[0].trim();
+        int id;
+        double salary;
         try {
-            int id = Integer.parseInt(args[1].trim());
-            String name = args[2].trim();
-            double salary = Double.parseDouble(args[3].trim());
-            if (!SalaryValidator.validateSalary(salary)) {
-                errors.add(line);
-                return;
-            }
-            if (position.equalsIgnoreCase(MANAGER_STRING)) {
-                createManager(id, name, salary, args[4], managers, errors, managerIds, line);
-            } else if (position.equalsIgnoreCase(EMPLOYEE_STRING)) {
-                createEmployee(id, name, salary, args[4], employees, errors, employeeIds, line);
-            } else {
-                errors.add(line);
-            }
+            id = Integer.parseInt(args[1].trim());
+            salary = Double.parseDouble(args[3].trim());
         } catch (NumberFormatException e) {
             errors.add(line);
+            return new ParseResult(managers, employees, errors);
         }
-    }
-
-    private static void createManager(
-            int id,
-            String name,
-            double salary,
-            String departmentName,
-            List<Manager> managers,
-            List<String> errors,
-            Set<Integer> managerIds,
-            String line
-    ) {
-        if (managerIds.contains(id)) {
+        String name = args[2].trim();
+        if (!SalaryValidator.validateSalary(salary)) {
             errors.add(line);
-            return;
+            return new ParseResult(managers, employees, errors);
         }
-        managerIds.add(id);
-        Manager manager = new Manager(id, name.trim(), salary, departmentName.trim());
-        managers.add(manager);
-    }
-
-    private static void createEmployee(
-            int id,
-            String name,
-            double salary,
-            String managerIdStr,
-            List<Employee> employees,
-            List<String> errors,
-            Set<Integer> employeeIds,
-            String line
-    ) {
-        int managerId;
-        try {
-            managerId = Integer.parseInt(managerIdStr.trim());
-        } catch (NumberFormatException e) {
+        if (position.equalsIgnoreCase(MANAGER_STRING)) {
+            Manager manager = new Manager(id, name, salary, args[4].trim());
+            managers.add(manager);
+        } else if (position.equalsIgnoreCase(EMPLOYEE_STRING)) {
+            int managerId;
+            try {
+                managerId = Integer.parseInt(args[4].trim());
+            } catch (NumberFormatException e) {
+                errors.add(line);
+                return new ParseResult(managers, employees, errors);
+            }
+            Employee employee = new Employee(id, name, salary, managerId);
+            employees.add(employee);
+        } else {
             errors.add(line);
-            return;
         }
-        if (employeeIds.contains(id)) {
-            errors.add(line);
-            return;
-        }
-        employeeIds.add(id);
-        Employee employee = new Employee(id, name.trim(), salary, managerId);
-        employees.add(employee);
+        return new ParseResult(managers, employees, errors);
     }
 }

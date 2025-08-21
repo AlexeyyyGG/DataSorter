@@ -1,4 +1,4 @@
-package datasorter.utils;
+package datasorter.result;
 
 import java.util.List;
 import datasorter.models.Employee;

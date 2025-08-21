@@ -1,13 +1,19 @@
 package datasorter.utils;
 
-public class ArgsParser {
-    private String sortBy;
-    private String order;
-    private boolean isStatMode;
-    private String outputFormat = "console";
-    private String outputPath;
+import datasorter.result.ParseArgsResult;
 
-    public void parseArgs(String[] args) {
+public class ArgsParser {
+    private static final String INVALID_SORT_OPTION_MESSAGE = "Invalid sort option";
+    private static final String INVALID_ORDER_OPTION_MESSAGE = "Invalid order option";
+    private static final String INVALID_OUTPUT_FORMAT_MESSAGE = "Invalid output format";
+    private static final String INVALID_OUTPUT_PATH_MESSAGE = "Invalid output path";
+
+    public ParseArgsResult parseArgs(String[] args) {
+        String sortBy = null;
+        String order = null;
+        boolean isStatMode = false;
+        String outputFormat = "console";
+        String outputPath = null;
         for (String arg : args) {
             if (arg.startsWith("--sort") || arg.startsWith("-s")) {
                 String[] parts = arg.split("=", 2);
@@ -16,7 +22,7 @@ public class ArgsParser {
                     if (value.equals("name") || value.equals("salary")) {
                         sortBy = value;
                     } else {
-                        throw new IllegalArgumentException("Invalid sort option");
+                        throw new IllegalArgumentException(INVALID_SORT_OPTION_MESSAGE);
                     }
                 }
             } else if (arg.startsWith("--order=")) {
@@ -26,7 +32,7 @@ public class ArgsParser {
                     if (value.equals("asc") || value.equals("desc")) {
                         order = value;
                     } else {
-                        throw new IllegalArgumentException("Invalid order option");
+                        throw new IllegalArgumentException(INVALID_ORDER_OPTION_MESSAGE);
                     }
                 }
             } else if (arg.equals("--stat")) {
@@ -38,7 +44,7 @@ public class ArgsParser {
                     if (value.equals("console") || value.equals("file")) {
                         outputFormat = value;
                     } else {
-                        throw new IllegalArgumentException("Invalid output format");
+                        throw new IllegalArgumentException(INVALID_OUTPUT_FORMAT_MESSAGE);
                     }
                 }
             } else if (arg.startsWith("--path=")) {
@@ -46,29 +52,10 @@ public class ArgsParser {
                 if (parts.length == 2 && !parts[1].isEmpty()) {
                     outputPath = parts[1];
                 } else {
-                    throw new IllegalArgumentException("Invalid output path");
+                    throw new IllegalArgumentException(INVALID_OUTPUT_PATH_MESSAGE);
                 }
             }
         }
-    }
-
-    public String getSortBy() {
-        return sortBy;
-    }
-
-    public String getOrder() {
-        return order;
-    }
-
-    public boolean isStatMode() {
-        return isStatMode;
-    }
-
-    public String getOutputFormat() {
-        return outputFormat;
-    }
-
-    public String getOutputPath() {
-        return outputPath;
+        return new ParseArgsResult(sortBy, order, isStatMode, outputFormat, outputPath);
     }
 }
