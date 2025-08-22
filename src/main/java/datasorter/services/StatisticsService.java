@@ -2,20 +2,39 @@ package datasorter.services;
 
 import datasorter.models.Department;
 import datasorter.models.Employee;
+import datasorter.result.Arguments;
 import datasorter.statistics.DepartmentStatistics;
+import datasorter.statistics.FormatStatistics;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
 public class StatisticsService {
-    Map<String, Department> departments;
-
-    public StatisticsService(Map<String, Department> departments) {
-        this.departments = departments;
+    public static void printStatistics(Arguments arguments, Map<String, Department> departments) {
+        List<DepartmentStatistics> stats = createStatistics(departments);
+        String outputContent = FormatStatistics.statForm(stats);
+        if ("console".equalsIgnoreCase(arguments.outputFormat().toString())) {
+            System.out.println(outputContent);
+        } else {
+            String pathStr = arguments.outputPath();
+            if (pathStr == null || pathStr.isEmpty()) {
+                System.out.println("Path to file for statistics output is not specified");
+                return;
+            }
+            try {
+                Files.writeString(Path.of(pathStr), outputContent);
+            } catch (Exception e) {
+                System.out.println("Failed to write file" + e.getMessage());
+            }
+        }
     }
 
-    public List<DepartmentStatistics> getStatistics() {
+    private static List<DepartmentStatistics> createStatistics(
+            Map<String, Department> departments
+    ) {
         List<DepartmentStatistics> statsList = new ArrayList<>();
         List<String> deptNames = new ArrayList<>(departments.keySet());
         Collections.sort(deptNames);
@@ -46,7 +65,7 @@ public class StatisticsService {
         return statsList;
     }
 
-    private double roundUp(double value) {
+    private static double roundUp(double value) {
         return Math.ceil(value * 100) / 100.0;
     }
 }

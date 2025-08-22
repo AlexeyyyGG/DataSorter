@@ -1,6 +1,9 @@
 package datasorter.utils;
 
-import datasorter.result.ParseArgsResult;
+import datasorter.result.Arguments;
+import datasorter.result.Order;
+import datasorter.result.OutputFormat;
+import datasorter.result.SortBy;
 
 public class ArgsParser {
     private static final String INVALID_SORT_OPTION_MESSAGE = "Invalid sort option";
@@ -8,11 +11,11 @@ public class ArgsParser {
     private static final String INVALID_OUTPUT_FORMAT_MESSAGE = "Invalid output format";
     private static final String INVALID_OUTPUT_PATH_MESSAGE = "Invalid output path";
 
-    public ParseArgsResult parseArgs(String[] args) {
-        String sortBy = null;
-        String order = null;
+    public Arguments parseArgs(String[] args) {
+        String sortByStr = null;
+        String orderStr = null;
         boolean isStatMode = false;
-        String outputFormat = "console";
+        String outputFormatStr = "console";
         String outputPath = null;
         for (String arg : args) {
             if (arg.startsWith("--sort") || arg.startsWith("-s")) {
@@ -20,7 +23,7 @@ public class ArgsParser {
                 if (parts.length == 2) {
                     String value = parts[1].toLowerCase();
                     if (value.equals("name") || value.equals("salary")) {
-                        sortBy = value;
+                        sortByStr = value;
                     } else {
                         throw new IllegalArgumentException(INVALID_SORT_OPTION_MESSAGE);
                     }
@@ -30,7 +33,7 @@ public class ArgsParser {
                 if (parts.length == 2) {
                     String value = parts[1].toLowerCase();
                     if (value.equals("asc") || value.equals("desc")) {
-                        order = value;
+                        orderStr = value;
                     } else {
                         throw new IllegalArgumentException(INVALID_ORDER_OPTION_MESSAGE);
                     }
@@ -42,7 +45,7 @@ public class ArgsParser {
                 if (parts.length == 2) {
                     String value = parts[1].toLowerCase();
                     if (value.equals("console") || value.equals("file")) {
-                        outputFormat = value;
+                        outputFormatStr = value;
                     } else {
                         throw new IllegalArgumentException(INVALID_OUTPUT_FORMAT_MESSAGE);
                     }
@@ -56,6 +59,20 @@ public class ArgsParser {
                 }
             }
         }
-        return new ParseArgsResult(sortBy, order, isStatMode, outputFormat, outputPath);
+        SortBy sortBy = null;
+        if (sortByStr != null) {
+           sortBy = SortBy.fromString(sortByStr);
+        }
+        Order order = null;
+        if (orderStr != null) {
+            order = Order.fromString(orderStr);
+        }
+        return new Arguments(
+                sortBy,
+                order,
+                isStatMode,
+                OutputFormat.fromString(outputFormatStr),
+                outputPath
+        );
     }
 }
