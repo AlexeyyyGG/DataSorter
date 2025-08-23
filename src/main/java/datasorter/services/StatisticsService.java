@@ -3,6 +3,7 @@ package datasorter.services;
 import datasorter.models.Department;
 import datasorter.models.Employee;
 import datasorter.result.Arguments;
+import datasorter.result.OutputFormat;
 import datasorter.statistics.DepartmentStatistics;
 import datasorter.statistics.FormatStatistics;
 import java.nio.file.Files;
@@ -13,26 +14,29 @@ import java.util.List;
 import java.util.Map;
 
 public class StatisticsService {
-    public static void printStatistics(Arguments arguments, Map<String, Department> departments) {
+    public void printStatistics(Arguments arguments, Map<String, Department> departments) {
         List<DepartmentStatistics> stats = createStatistics(departments);
         String outputContent = FormatStatistics.statForm(stats);
-        if ("console".equalsIgnoreCase(arguments.outputFormat().toString())) {
+        if (arguments.outputFormat() == OutputFormat.CONSOLE) {
             System.out.println(outputContent);
         } else {
-            String pathStr = arguments.outputPath();
-            if (pathStr == null || pathStr.isEmpty()) {
-                System.out.println("Path to file for statistics output is not specified");
-                return;
-            }
-            try {
-                Files.writeString(Path.of(pathStr), outputContent);
-            } catch (Exception e) {
-                System.out.println("Failed to write file" + e.getMessage());
-            }
+            printToFile(arguments.outputPath(), outputContent);
         }
     }
 
-    private static List<DepartmentStatistics> createStatistics(
+    private void printToFile(String pathStr, String Content) {
+        if (pathStr == null || pathStr.isEmpty()) {
+            System.out.println("Path to file for statistics output is not specified");
+            return;
+        }
+        try {
+            Files.writeString(Path.of(pathStr), Content);
+        } catch (Exception e) {
+            System.out.println("Failed to write file" + e.getMessage());
+        }
+    }
+
+    private List<DepartmentStatistics> createStatistics(
             Map<String, Department> departments
     ) {
         List<DepartmentStatistics> statsList = new ArrayList<>();
@@ -43,19 +47,13 @@ public class StatisticsService {
             List<Double> salaries = new ArrayList<>();
             for (Employee emp : dept.getEmployees()) {
                 double salaryVal = emp.getSalary();
-                if (!Double.isNaN(salaryVal)) {
-                    salaries.add(salaryVal);
-                }
+                salaries.add(salaryVal);
             }
             double minSalary = 0.0, maxSalary = 0.0, midSalary = 0.0;
             if (!salaries.isEmpty()) {
                 minSalary = Collections.min(salaries);
                 maxSalary = Collections.max(salaries);
-                double sum = 0.0;
-                for (double s : salaries) {
-                    sum += s;
-                }
-                midSalary = sum / salaries.size();
+                midSalary = calculateAverageSalary(salaries);
             }
             statsList.add(new DepartmentStatistics(deptName,
                     roundUp(minSalary),
@@ -65,7 +63,18 @@ public class StatisticsService {
         return statsList;
     }
 
-    private static double roundUp(double value) {
+    private double calculateAverageSalary(List<Double> salaries) {
+        if (salaries.isEmpty()) {
+            return 0.0;
+        }
+        double sum = 0.0;
+        for (double s : salaries) {
+            sum += s;
+        }
+        return sum / salaries.size();
+    }
+
+    private double roundUp(double value) {
         return Math.ceil(value * 100) / 100.0;
     }
 }

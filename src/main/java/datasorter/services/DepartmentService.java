@@ -12,7 +12,7 @@ import datasorter.models.Employee;
 import datasorter.models.Manager;
 
 public class DepartmentService {
-    public static BuildDeptResult buildDepartments(
+    public BuildDeptResult buildDepartments(
             List<Manager> managers,
             List<Employee> employees,
             SortBy sortBy,
@@ -45,7 +45,7 @@ public class DepartmentService {
         return new BuildDeptResult(departments, employeesWithOutDept);
     }
 
-    private static Department getOrCreateDepartment(Map<String, Department> map, String name) {
+    private Department getOrCreateDepartment(Map<String, Department> map, String name) {
         if (map.containsKey(name)) {
             return map.get(name);
         } else {
@@ -55,7 +55,7 @@ public class DepartmentService {
         }
     }
 
-    private static Manager findManagerById(List<Manager> managers, int id) {
+    private Manager findManagerById(List<Manager> managers, int id) {
         for (Manager m : managers) {
             if (m.getId() == id) {
                 return m;
@@ -64,10 +64,10 @@ public class DepartmentService {
         return null;
     }
 
-    private static void sortEmployees(List<Employee> employees, SortBy sortBy, Order order) {
+    private void sortEmployees(List<Employee> employees, SortBy sortBy, Order order) {
         employees.sort((e1, e2) -> {
             int cmp;
-            if ("name".equalsIgnoreCase(String.valueOf(sortBy))) {
+            if (sortBy == SortBy.NAME) {
                 cmp = e1.getName().compareToIgnoreCase(e2.getName());
             } else {
                 cmp = Double.compare(e1.getSalary(), e2.getSalary());

@@ -17,12 +17,13 @@ import java.util.Map;
 
 public class Main {
     public static void main(String[] args) {
-        ArgsParser argsParser = new ArgsParser();
-        Arguments arguments = argsParser.parseArgs(args);
+        DepartmentService departmentService = new DepartmentService();
+        StatisticsService statisticsService = new StatisticsService();
+        Arguments arguments = ArgsParser.parseArgs(args);
         SortBy sortBy = arguments.sortBy();
         Order order = arguments.order();
         ParseResult result = FilesReader.readSbFilesAndParse();
-        BuildDeptResult buildDeptResult = DepartmentService.buildDepartments(
+        BuildDeptResult buildDeptResult = departmentService.buildDepartments(
                 result.managers(),
                 result.employees(),
                 sortBy,
@@ -30,7 +31,7 @@ public class Main {
         );
         Map<String, Department> departments = buildDeptResult.departments();
         if (arguments.isStatMode()) {
-            StatisticsService.printStatistics(arguments, departments);
+            statisticsService.printStatistics(arguments, departments);
         }
         List<Employee> employeesWithOutDept = buildDeptResult.employeesWithOutDept();
         FileWriter.writeErrors(result.errors(), employeesWithOutDept);
