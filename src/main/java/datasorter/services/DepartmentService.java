@@ -21,16 +21,22 @@ public class DepartmentService {
         Map<String, Department> departments = new HashMap<>();
         List<Employee> employeesWithOutDept = new ArrayList<>();
         for (Manager manager : managers) {
-            Department department = getOrCreateDepartment(departments, manager.getDepartmentName());
+            Department department = getExistingDepartment(departments, manager.getDepartmentName());
+            if (department == null) {
+                department = createDepartment(departments, manager.getDepartmentName());
+            }
             department.addManager(manager);
         }
         for (Employee employee : employees) {
             Manager manager = findManagerById(managers, employee.getManagerId());
             if (manager != null) {
-                Department department = getOrCreateDepartment(
+                Department department = getExistingDepartment(
                         departments,
                         manager.getDepartmentName()
                 );
+                if (department == null) {
+                    department = createDepartment(departments, manager.getDepartmentName());
+                }
                 department.addEmployee(employee);
             } else {
                 employeesWithOutDept.add(employee);
@@ -45,14 +51,14 @@ public class DepartmentService {
         return new BuildDeptResult(departments, employeesWithOutDept);
     }
 
-    private Department getOrCreateDepartment(Map<String, Department> map, String name) {
-        if (map.containsKey(name)) {
-            return map.get(name);
-        } else {
-            Department department = new Department(name);
-            map.put(name, department);
-            return department;
-        }
+    private Department getExistingDepartment(Map<String, Department> map, String name) {
+        return map.get(name);
+    }
+
+    private Department createDepartment(Map<String, Department> map, String name) {
+        Department department = new Department(name);
+        map.put(name, department);
+        return department;
     }
 
     private Manager findManagerById(List<Manager> managers, int id) {

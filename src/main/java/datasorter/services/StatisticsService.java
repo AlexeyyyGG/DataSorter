@@ -40,10 +40,8 @@ public class StatisticsService {
             Map<String, Department> departments
     ) {
         List<DepartmentStatistics> statsList = new ArrayList<>();
-        List<String> deptNames = new ArrayList<>(departments.keySet());
-        Collections.sort(deptNames);
-        for (String deptName : deptNames) {
-            Department dept = departments.get(deptName);
+        for (Department dept : departments.values()) {
+            String deptName = dept.getName();
             List<Double> salaries = new ArrayList<>();
             for (Employee emp : dept.getEmployees()) {
                 double salaryVal = emp.getSalary();
@@ -60,6 +58,8 @@ public class StatisticsService {
                     roundUp(maxSalary),
                     roundUp(midSalary)));
         }
+        Collections.sort(statsList, (d1, d2) ->
+                d1.getDepartmentName().compareTo(d2.getDepartmentName()));
         return statsList;
     }
 

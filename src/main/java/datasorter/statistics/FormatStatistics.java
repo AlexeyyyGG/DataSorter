@@ -10,10 +10,10 @@ public class FormatStatistics {
         sb.append(String.format(HEADER_FORMAT, "department", "min", "max", "mid"));
         for (DepartmentStatistics ds : stats) {
             sb.append(String.format(HEADER_FORMAT,
-                    ds.departmentName,
-                    ds.minSalary,
-                    ds.maxSalary,
-                    ds.midSalary));
+                    ds.getDepartmentName(),
+                    ds.getMinSalary(),
+                    ds.getMaxSalary(),
+                    ds.getMidSalary()));
         }
         return sb.toString();
     }
