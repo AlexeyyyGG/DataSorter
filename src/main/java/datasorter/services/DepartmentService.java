@@ -13,30 +13,26 @@ import datasorter.models.Manager;
 
 public class DepartmentService {
     public BuildDeptResult buildDepartments(
-            List<Manager> managers,
+            Map<Integer, Manager> managers,
             List<Employee> employees,
             SortBy sortBy,
             Order order
     ) {
         Map<String, Department> departments = new HashMap<>();
+        List<Manager> managersWithOutDept = new ArrayList<>();
         List<Employee> employeesWithOutDept = new ArrayList<>();
-        for (Manager manager : managers) {
-            Department department = getExistingDepartment(departments, manager.getDepartmentName());
-            if (department == null) {
-                department = createDepartment(departments, manager.getDepartmentName());
+        for (Manager manager : managers.values()) {
+            Department department = createDepartment(departments, manager.getDepartmentName());
+            if (department.getManager() != null) {
+                managersWithOutDept.add(manager);
+            } else {
+                department.addManager(manager);
             }
-            department.addManager(manager);
         }
         for (Employee employee : employees) {
             Manager manager = findManagerById(managers, employee.getManagerId());
             if (manager != null) {
-                Department department = getExistingDepartment(
-                        departments,
-                        manager.getDepartmentName()
-                );
-                if (department == null) {
-                    department = createDepartment(departments, manager.getDepartmentName());
-                }
+                Department department = departments.get(manager.getDepartmentName());
                 department.addEmployee(employee);
             } else {
                 employeesWithOutDept.add(employee);
@@ -48,11 +44,7 @@ public class DepartmentService {
                 sortEmployees(deptEmployees, sortBy, order);
             }
         }
-        return new BuildDeptResult(departments, employeesWithOutDept);
-    }
-
-    private Department getExistingDepartment(Map<String, Department> map, String name) {
-        return map.get(name);
+        return new BuildDeptResult(departments, employeesWithOutDept, managersWithOutDept);
     }
 
     private Department createDepartment(Map<String, Department> map, String name) {
@@ -61,24 +53,19 @@ public class DepartmentService {
         return department;
     }
 
-    private Manager findManagerById(List<Manager> managers, int id) {
-        for (Manager m : managers) {
-            if (m.getId() == id) {
-                return m;
-            }
-        }
-        return null;
+    private Manager findManagerById(Map<Integer, Manager> managers, int id) {
+        return managers.get(id);
     }
 
     private void sortEmployees(List<Employee> employees, SortBy sortBy, Order order) {
         employees.sort((e1, e2) -> {
-            int cmp;
+            int comparsion;
             if (sortBy == SortBy.NAME) {
-                cmp = e1.getName().compareToIgnoreCase(e2.getName());
+                comparsion = e1.getName().compareToIgnoreCase(e2.getName());
             } else {
-                cmp = Double.compare(e1.getSalary(), e2.getSalary());
+                comparsion = Double.compare(e1.getSalary(), e2.getSalary());
             }
-            return "asc".equalsIgnoreCase(String.valueOf(order)) ? cmp : -cmp;
+            return order == Order.ASC ? comparsion : -comparsion;
         });
     }
 }

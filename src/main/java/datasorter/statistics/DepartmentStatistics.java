@@ -1,5 +1,8 @@
 package datasorter.statistics;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+
 public class DepartmentStatistics {
     private final String departmentName;
     private final String minSalary;
@@ -35,6 +38,8 @@ public class DepartmentStatistics {
     }
 
     private String formatDouble(double value) {
-        return String.format("%.2f", value);
+        BigDecimal bd = new BigDecimal(value);
+        bd = bd.setScale(2, RoundingMode.CEILING);
+        return bd.toPlainString();
     }
 }

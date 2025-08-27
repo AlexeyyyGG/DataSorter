@@ -10,8 +10,8 @@ import datasorter.models.Employee;
 import datasorter.models.Manager;
 
 public class FileWriter {
-    private static final String MANAGER_PARAMS = "Manager, %d, %s, %.2f, %s";
-    private static final String EMPLOYEE_PARAMS = "Employee, %d, %s, %.2f, %d";
+    private static final String MANAGER_PARAMS = "Manager,%d,%s,%.2f,%s";
+    private static final String EMPLOYEE_PARAMS = "Employee,%d,%s,%.2f,%d";
     private static final String FAILED_TO_WRITE_FILE_MESSAGE = "Failed to write file";
     private static final String FAILED_TO_WRITE = "Failed to write to error log";
     private static final String ERROR_LOG_FILE = "error.log";
@@ -50,7 +50,11 @@ public class FileWriter {
         }
     }
 
-    public static void writeErrors(List<String> errors, List<Employee> employees) {
+    public static void writeErrors(
+            List<String> errors,
+            List<Employee> employees,
+            List<Manager> managers
+    ) {
         try (BufferedWriter bw = new BufferedWriter(new java.io.FileWriter(ERROR_LOG_FILE, true))) {
             for (String error : errors) {
                 bw.write(error);
@@ -58,6 +62,10 @@ public class FileWriter {
             }
             for (Employee employee : employees) {
                 bw.write(employee.toString());
+                bw.newLine();
+            }
+            for (Manager manager : managers) {
+                bw.write(manager.toString());
                 bw.newLine();
             }
         } catch (IOException ioe) {

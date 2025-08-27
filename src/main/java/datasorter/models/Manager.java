@@ -28,4 +28,12 @@ public class Manager {
     public String getDepartmentName() {
         return departmentName;
     }
+    @Override
+    public String toString() {
+        return "Manager," +
+                id + "," +
+                name + "," +
+                salary + "," +
+                departmentName;
+    }
 }

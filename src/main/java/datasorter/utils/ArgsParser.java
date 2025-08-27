@@ -12,71 +12,75 @@ public class ArgsParser {
     private static final String INVALID_OUTPUT_PATH_MESSAGE = "Invalid output path";
     private static final String MISSING_SORT_FOR_ORDER_MESSAGE =
             "The parameter --order is specified, but the sorting parameter --sort is missing";
+    private static final String MISSING_OUTPUT_PATH = "Missing output path";
 
     public static Arguments parseArgs(String[] args) {
-        String sortByStr = null;
-        String orderStr = null;
+        SortBy sortBy = null;
+        Order order = null;
         boolean isStatMode = false;
-        String outputFormatStr = "console";
+        OutputFormat outputFormat = OutputFormat.CONSOLE;
         String outputPath = null;
         for (String arg : args) {
-            if (arg.startsWith("--sort") || arg.startsWith("-s")) {
-                sortByStr = parseSort(arg);
-            } else if (arg.startsWith("--order=")) {
-                orderStr = parseOrder(arg);
-            } else if (arg.equals("--stat")) {
-                isStatMode = true;
-            } else if (arg.startsWith("--output=") || arg.startsWith("-o=")) {
-                outputFormatStr = parseOutputFormat(arg);
-            } else if (arg.startsWith("--path=")) {
-                outputPath = parseOutputPath(arg);
+            String key = arg.split("=")[0];
+            switch (key) {
+                case "--sort":
+                case "-s":
+                    sortBy = parseSort(arg);
+                    break;
+                case "--order":
+                    order = parseOrder(arg);
+                    break;
+                case "--stat":
+                    isStatMode = true;
+                    break;
+                case "--output":
+                case "-o":
+                    outputFormat = parseOutputFormat(arg);
+                    break;
+                case "--path":
+                    outputPath = parseOutputPath(arg);
+                    break;
+                default:
+                    throw new IllegalArgumentException("Invalid argument: " + arg);
             }
         }
-        if (orderStr != null && sortByStr == null) {
+        if (order != null && sortBy == null) {
             throw new IllegalArgumentException(MISSING_SORT_FOR_ORDER_MESSAGE);
         }
-        SortBy sortBy = null;
-        if (sortByStr != null) {
-            sortBy = SortBy.fromString(sortByStr);
-        }
-        Order order = null;
-        if (orderStr != null) {
-            order = Order.fromString(orderStr);
+        if (outputFormat == OutputFormat.FILE && (outputPath == null || outputPath.isEmpty())) {
+            throw new IllegalArgumentException(MISSING_OUTPUT_PATH);
         }
         return new Arguments(
                 sortBy,
                 order,
                 isStatMode,
-                OutputFormat.fromString(outputFormatStr),
+                outputFormat,
                 outputPath
         );
     }
 
-    private static String parseSort(String arg) {
+    private static SortBy parseSort(String arg) {
         String[] parts = arg.split("=", 2);
-        if (parts.length != 2 || !(parts[1].equalsIgnoreCase("name")
-                || parts[1].equalsIgnoreCase("salary"))) {
+        if (parts.length != 2) {
             throw new IllegalArgumentException(INVALID_SORT_OPTION_MESSAGE);
         }
-        return parts[1].toLowerCase();
+        return SortBy.fromString(parts[1]);
     }
 
-    private static String parseOrder(String arg) {
+    private static Order parseOrder(String arg) {
         String[] parts = arg.split("=", 2);
-        if (parts.length != 2 || !(parts[1].equalsIgnoreCase("asc")
-                || parts[1].equalsIgnoreCase("desc"))) {
+        if (parts.length != 2) {
             throw new IllegalArgumentException(INVALID_ORDER_OPTION_MESSAGE);
         }
-        return parts[1].toLowerCase();
+        return Order.fromString(parts[1]);
     }
 
-    private static String parseOutputFormat(String arg) {
+    private static OutputFormat parseOutputFormat(String arg) {
         String[] parts = arg.split("=", 2);
-        if (parts.length != 2 || !(parts[1].equalsIgnoreCase("console")
-                || parts[1].equalsIgnoreCase("file"))) {
+        if (parts.length != 2) {
             throw new IllegalArgumentException(INVALID_OUTPUT_FORMAT_MESSAGE);
         }
-        return parts[1].toLowerCase();
+        return OutputFormat.fromString(parts[1]);
     }
 
     private static String parseOutputPath(String arg) {

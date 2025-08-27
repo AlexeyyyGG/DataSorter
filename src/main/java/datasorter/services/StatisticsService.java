@@ -10,8 +10,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class StatisticsService {
     public void printStatistics(Arguments arguments, Map<String, Department> departments) {
@@ -25,10 +27,6 @@ public class StatisticsService {
     }
 
     private void printToFile(String pathStr, String Content) {
-        if (pathStr == null || pathStr.isEmpty()) {
-            System.out.println("Path to file for statistics output is not specified");
-            return;
-        }
         try {
             Files.writeString(Path.of(pathStr), Content);
         } catch (Exception e) {
@@ -42,11 +40,9 @@ public class StatisticsService {
         List<DepartmentStatistics> statsList = new ArrayList<>();
         for (Department dept : departments.values()) {
             String deptName = dept.getName();
-            List<Double> salaries = new ArrayList<>();
-            for (Employee emp : dept.getEmployees()) {
-                double salaryVal = emp.getSalary();
-                salaries.add(salaryVal);
-            }
+            List<Double> salaries = dept.getEmployees().stream()
+                    .map(Employee::getSalary)
+                    .collect(Collectors.toList());
             double minSalary = 0.0, maxSalary = 0.0, midSalary = 0.0;
             if (!salaries.isEmpty()) {
                 minSalary = Collections.min(salaries);
@@ -58,8 +54,7 @@ public class StatisticsService {
                     roundUp(maxSalary),
                     roundUp(midSalary)));
         }
-        Collections.sort(statsList, (d1, d2) ->
-                d1.getDepartmentName().compareTo(d2.getDepartmentName()));
+        statsList.sort(Comparator.comparing(DepartmentStatistics::getDepartmentName));
         return statsList;
     }
 
