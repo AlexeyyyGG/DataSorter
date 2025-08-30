@@ -61,21 +61,21 @@ public class FilesReader {
         Map<Integer, Manager> managers = new HashMap<>();
         List<Employee> employees = new ArrayList<>();
         List<String> errors = new ArrayList<>();
-        List<String> lines = readLinesFromFile(filePath);
         Set<Integer> employeeIds = new HashSet<>();
-        for (String line : lines) {
-            ParseResult result = parseLine(line);
+        for (String line : readLinesFromFile(filePath)) {
+            String cleanedLine = cleanLine(line);
+            ParseResult result = parseLine(cleanedLine);
             errors.addAll(result.errors());
             for (Manager manager : result.managers().values()) {
                 if (managers.containsKey(manager.getId())) {
-                    errors.add(line);
+                    errors.add(cleanedLine);
                 } else {
                     managers.put(manager.getId(), manager);
                 }
             }
             for (Employee employee : result.employees()) {
                 if (employeeIds.contains(employee.getId())) {
-                    errors.add(line);
+                    errors.add(cleanedLine);
                 } else {
                     employeeIds.add(employee.getId());
                 }
@@ -97,14 +97,13 @@ public class FilesReader {
         List<String> errors = new ArrayList<>();
         Map<Integer, Manager> managers = new HashMap<>();
         List<Employee> employees = new ArrayList<>();
-        String[] args = cleanLine(line);
-        String cleanedLine = String.join(",", args);
+        String[] args = line.split(",");
         if (args.length < 5) {
-            errors.add(cleanedLine);
+            errors.add(line);
             return new ParseResult(managers, employees, errors);
         }
         String position = args[0].trim();
-        ParseData data = parseCommonFields(args, errors, cleanedLine);
+        ParseData data = parseCommonFields(args, errors, line);
         if (data == null) {
             return new ParseResult(managers, employees, errors);
         }
@@ -116,11 +115,11 @@ public class FilesReader {
                 Employee employee = createEmployee(data, args);
                 employees.add(employee);
             } catch (NumberFormatException e) {
-                errors.add(cleanedLine);
+                errors.add(line);
                 return new ParseResult(managers, employees, errors);
             }
         } else {
-            errors.add(cleanedLine);
+            errors.add(line);
         }
         return new ParseResult(managers, employees, errors);
     }
@@ -168,11 +167,11 @@ public class FilesReader {
         return new ParseData(id, name, salary);
     }
 
-    private static String[] cleanLine(String line) {
+    private static String cleanLine(String line) {
         String[] args = line.split(",");
         for (int i = 0; i < args.length; i++) {
             args[i] = args[i].trim();
         }
-        return args;
+        return String.join(",", args);
     }
 }

@@ -10,9 +10,13 @@ public class ArgsParser {
     private static final String INVALID_ORDER_OPTION_MESSAGE = "Invalid order option";
     private static final String INVALID_OUTPUT_FORMAT_MESSAGE = "Invalid output format";
     private static final String INVALID_OUTPUT_PATH_MESSAGE = "Invalid output path";
-    private static final String MISSING_SORT_FOR_ORDER_MESSAGE =
-            "The parameter --order is specified, but the sorting parameter --sort is missing";
+    private static final String ERROR_MISSING_ORDER_OR_SORT_PARAMETERS =
+            "The parameters --order and --sort must be provided together";
     private static final String MISSING_OUTPUT_PATH = "Missing output path";
+    private static final String ERROR_OUTPUT_PATH_WITH_INVALID_FORMAT =
+            "Output path can only be specified when the output format is FILE";
+    private static final String ERROR_MESSAGE_OUTPUT_PATH_WITHOUT_STAT =
+            "Parameters --output and --path can only be used together with --stat";
 
     public static Arguments parseArgs(String[] args) {
         SortBy sortBy = null;
@@ -44,11 +48,18 @@ public class ArgsParser {
                     throw new IllegalArgumentException("Invalid argument: " + arg);
             }
         }
-        if (order != null && sortBy == null) {
-            throw new IllegalArgumentException(MISSING_SORT_FOR_ORDER_MESSAGE);
+        if (order != null && sortBy == null || sortBy != null && order == null) {
+            throw new IllegalArgumentException(ERROR_MISSING_ORDER_OR_SORT_PARAMETERS);
         }
         if (outputFormat == OutputFormat.FILE && (outputPath == null || outputPath.isEmpty())) {
             throw new IllegalArgumentException(MISSING_OUTPUT_PATH);
+        }
+        if (outputPath != null && outputFormat != OutputFormat.FILE) {
+            throw new IllegalArgumentException(ERROR_OUTPUT_PATH_WITH_INVALID_FORMAT);
+        }
+        if ((outputFormat == OutputFormat.FILE || outputFormat == OutputFormat.CONSOLE)
+                && outputPath != null && !isStatMode) {
+            throw new IllegalArgumentException(ERROR_MESSAGE_OUTPUT_PATH_WITHOUT_STAT);
         }
         return new Arguments(
                 sortBy,

@@ -59,13 +59,13 @@ public class DepartmentService {
 
     private void sortEmployees(List<Employee> employees, SortBy sortBy, Order order) {
         employees.sort((e1, e2) -> {
-            int comparsion;
+            int comparison;
             if (sortBy == SortBy.NAME) {
-                comparsion = e1.getName().compareToIgnoreCase(e2.getName());
+                comparison = e1.getName().compareToIgnoreCase(e2.getName());
             } else {
-                comparsion = Double.compare(e1.getSalary(), e2.getSalary());
+                comparison = Double.compare(e1.getSalary(), e2.getSalary());
             }
-            return order == Order.ASC ? comparsion : -comparsion;
+            return order == Order.ASC ? comparison : -comparison;
         });
     }
 }

@@ -9,11 +9,10 @@ import datasorter.statistics.FormatStatistics;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
+import java.util.DoubleSummaryStatistics;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 public class StatisticsService {
     public void printStatistics(Arguments arguments, Map<String, Department> departments) {
@@ -40,15 +39,12 @@ public class StatisticsService {
         List<DepartmentStatistics> statsList = new ArrayList<>();
         for (Department dept : departments.values()) {
             String deptName = dept.getName();
-            List<Double> salaries = dept.getEmployees().stream()
-                    .map(Employee::getSalary)
-                    .collect(Collectors.toList());
-            double minSalary = 0.0, maxSalary = 0.0, midSalary = 0.0;
-            if (!salaries.isEmpty()) {
-                minSalary = Collections.min(salaries);
-                maxSalary = Collections.max(salaries);
-                midSalary = calculateAverageSalary(salaries);
-            }
+            DoubleSummaryStatistics stats = dept.getEmployees().stream()
+                    .mapToDouble(Employee::getSalary)
+                    .summaryStatistics();
+            double minSalary = stats.getCount() > 0 ? stats.getMin() : 0;
+            double maxSalary = stats.getCount() > 0 ? stats.getMax() : 0;
+            double midSalary = stats.getCount() > 0 ? stats.getAverage() : 0;
             statsList.add(new DepartmentStatistics(deptName,
                     roundUp(minSalary),
                     roundUp(maxSalary),
@@ -56,17 +52,6 @@ public class StatisticsService {
         }
         statsList.sort(Comparator.comparing(DepartmentStatistics::getDepartmentName));
         return statsList;
-    }
-
-    private double calculateAverageSalary(List<Double> salaries) {
-        if (salaries.isEmpty()) {
-            return 0.0;
-        }
-        double sum = 0.0;
-        for (double s : salaries) {
-            sum += s;
-        }
-        return sum / salaries.size();
     }
 
     private double roundUp(double value) {
